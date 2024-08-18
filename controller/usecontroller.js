@@ -58,10 +58,10 @@ exports.login = async (req, res) => {
     
    try {
     if(!req.body.email){
-        return res.status(400).json({msg:"please enter your mail id"})
+        return res.status(400).json({message:"please enter your mail id"})
     }
     if(!req.body.password){
-        return  res.status(400).json({msg:"please enter your password"})
+        return  res.status(400).json({message:"please enter your password"})
 }
    
 
