@@ -4,35 +4,53 @@ const bcrypt = require('bcrypt');
 const sendtoken=require("../utils/jwt")
 exports.registerUser = async (req, res) => {
     
+
     try {
-        const password=  await bcrypt.hash(req.body.password,10)
-    
-    let newUser = { name: req.body.name, email: req.body.email,password: password };
-    let sql = 'INSERT INTO users SET ?';
-    db.query(sql, newUser,async(err, result) => {
-        if (err){
-            return res.status(500).json({
-                success:false,
-                data:err.sqlMessage,  
-                message:'User registration failed.'
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ msg: "Please provide both email and password" });
+        }
+
+        let sqlCheck = 'SELECT * FROM users WHERE email = ?';
+        db.query(sqlCheck, [email], async (err, result) => {
+            if (err) throw err;
+
+            if (result.length > 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Email already registered'
+                });
+            } else {
+                const hashedPassword = await bcrypt.hash(password, 10);
+                
+                 let newUser = { name: req.body.name, email: req.body.email,password:hashedPassword }
+                let sqlInsert = 'INSERT INTO users SET ?';
+                db.query(sqlInsert, newUser, (err, result) => {
+                    if (err) {
+                        return res.status(500).json({
+                            success: false,
+                            message: 'Database error: ' + err.message
+                        });
+                    }
+
+                    return res.status(201).json({
+                        success: true,
+                        message: 'User registered successfully',
+                        userId: result.insertId
+                    });
+                });
             }
-        );
-        };
-        return  res.status(200).json({
-          success:true,
-          data:result,  
-          message:'User registration successfully...'});
-        
-    });
+        });
     } catch (error) {
-        return  res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: error.message || 'Internal Server Error',
-        })
-
+        });
     }
-    
 };
+    
+
 
 
 
@@ -49,14 +67,8 @@ exports.login = async (req, res) => {
 
     let sql = 'SELECT * FROM users WHERE email = ?';
     db.query(sql, [req.body.email],async(err, result) => {
-        
-        if (err){
-            return   res.status(500).json({
-                success:false,
-                data:err.sqlMessage,  
-                message:'User failed'
-            });
-        };
+       
+        if (err)throw err
        
         if (result.length > 0) {
             
@@ -113,11 +125,11 @@ exports.getAllUsers = async(req, res) => {
             return res.status(200).json({
                 success:true,
                 data:results,  
-                message:'allUserdata successfully...'});
+                message:'All User data successfully...'});
           }else{
             return res.status(404).json({
                 success:false,
-                message:'no records...'});
+                message:'No Records...'});
           }
     });
    } catch (error) {
@@ -143,11 +155,11 @@ exports.getUserById =async (req, res) => {
             return res.status(200).json({
                 success:true,
                 data:result,  
-                message:'singUserdata successfully...'});
+                message:'Userdata successfully...'});
           }else{
             return res.status(404).json({
                 success:false,
-                message:'no records...'});
+                message:'No Records...'});
           }
     });
   } catch (error) {
@@ -190,13 +202,7 @@ exports.deleteUser = async(req, res) => {
   try {
     let sql = 'DELETE FROM users WHERE id = ?';
     db.query(sql, [req.user.id],async (err, result) => {
-        if (err){
-            return res.status(500).json({
-                success:false,
-                data:err.sqlMessage,  
-                message:'User faild'
-            });
-        };
+        if (err) throw err
         return res.status(200).json({
             success:true,
             data:result,  
