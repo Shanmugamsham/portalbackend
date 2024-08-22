@@ -21,8 +21,8 @@ const options = {
       },
       servers: [
         {
-          url: "http://localhost:3000",
-                // url: "https://portalbackend-x872.onrender.com"
+          // url: "http://localhost:3000",
+                 url: "https://portalbackend-x872.onrender.com"
         },
       ],
     },
