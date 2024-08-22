@@ -334,6 +334,7 @@ exports.updateallUser = async(req, res) => {
       }
    try {
     const {name, email, password } = req.body;
+    
      
     if (!email || !password ||!name) {
         return res.status(400).json({ msg: "Please provide name, email and password" });
