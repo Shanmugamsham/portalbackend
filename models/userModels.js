@@ -7,7 +7,9 @@ const createUsersTable = () => {
             id INT AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(250) NOT NULL,
             email VARCHAR(250) NOT NULL UNIQUE,
-            password VARCHAR(250) NOT NULL
+            password VARCHAR(250) NOT NULL,
+            avatar VARCHAR(250),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `;
     db.query(sql, (err, result) => {
@@ -19,5 +21,5 @@ const createUsersTable = () => {
     });
 };
 
-// Call the function to create the table
+
 createUsersTable();

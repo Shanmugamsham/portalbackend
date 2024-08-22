@@ -7,7 +7,7 @@ const sendtoken=async(user,statecode,res,message,id)=>{
     
         const secretKey ='defaultSecretKey';
         const token = await jwt.sign({ id: id }, secretKey, {
-         expiresIn: '7d'
+         expiresIn: '20d'
 });
       
      const options = {

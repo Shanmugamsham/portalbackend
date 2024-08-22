@@ -3,33 +3,39 @@ require('dotenv').config();
 const db = require("../database/database");
 
 exports.isAuthenticate = async (req, res, next) => {
-    const { token } = req.headers;
+  
    
-    if (!token) {
-        return res.status(400).json({ message: 'Login first to handle this resource' });
-    }
+    
 
     try {
+        const token  = req.headers.token||req.cookies.token;
+        if (!token) {
+            return res.status(400).json({ message: 'Login first to handle this resource' });
+        }
+
         const decoded = await jwt.verify(token, 'defaultSecretKey');
         const id = decoded.id;
-
+       
+         if(!id){
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized - Invalid or missing token"
+            });
+         }
         
 
         let sql = 'SELECT * FROM users WHERE id = ?';
-        db.query(sql, [id], (err, result) => {
+        db.query(sql, [id], async(err, result) => {
             if (err) {
                 return res.status(500).json({
                     success: false,
-                    data: err.sqlMessage,
-                    message: 'User query failed'
+                    message: 'Database error'
                 });
             }
 
             if (result.length > 0) {
-                const user = result[0];
-
-                 req.user = user;
-
+                const user = await result[0];
+                 req.user = await user;
                 next(); 
             } else {
                 return res.status(404).json({
@@ -39,11 +45,9 @@ exports.isAuthenticate = async (req, res, next) => {
             }
         });
     } catch (error) {
-    
-        
-        return res.status(401).json({
+        return res.status(500).json({
             success: false,
-            message: 'Invalid token or token expired'
+            message: 'Internal server error'
         });
     }
 };
