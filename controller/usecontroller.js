@@ -2,7 +2,8 @@ const db = require('../database/database');
 const bcrypt = require('bcrypt');
 const multer=require("multer")
 const path =require("path")
-const sendtoken=require("../utils/jwt")
+const sendtoken=require("../utils/jwt");
+const { log } = require('util');
 
 
 //  const storage=multer.diskStorage({
@@ -232,46 +233,29 @@ exports.updateUser = async(req, res) => {
     let BASE_URL = `${req.protocol}://${req.get('host')}`
      if(req.file){
          avatar = `${BASE_URL}/uploads/user/${req.file.originalname}`
-
       }
       
+
+
    try {
     const {name, email, password } = req.body;
     if (!email || !password ||!name) {
         return res.status(400).json({ msg: "Please provide name, email and password" });
     }
-
-    let sqlCheck = 'SELECT * FROM users WHERE email = ?';
-        db.query(sqlCheck, [email], async (err, result) => {
-            if (err) throw err;
-
-            if (result.length > 0) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Email already registered'
-                });
-            } else {
-
-                const password=  await bcrypt.hash(req.body.password,10)
+            const passwordhash=  await bcrypt.hash(req.body.password,10)
     
-                let updatedUser = { name: req.body.name, email: req.body.email,password:password,avatar:avatar };
-                let sql = 'UPDATE users SET ? WHERE id = ?';
-                 db.query(sql, [updatedUser, req.user.id],async (err, result) => {
-                    if (err) {
-                               return res.status(500).json({
-                                     success: false,
-                                     message: 'Database error: ' + err.message
-                                 });
-                             }
-                    return res.status(201).json({
-                        success:true,
-                       message:'User updated successfully.'})
-
-            })
-
-            }
-
-
+            let updatedUser = { name: req.body.name, email: req.body.email,password:passwordhash,avatar:avatar };
+            let sql = 'UPDATE users SET ? WHERE id = ?';
+             db.query(sql, [updatedUser, req.user.id],async (err, result) => {
+                if (err) {
+                           return res.status(500).json({
+                                 success: false,
+                                 message: 'Database error: ' + err.message
+                             });
+                         }
+                return res.status(201).json({
+                    success:true,
+                   message:'User updated successfully.'})
 
   
 });
@@ -333,42 +317,42 @@ exports.updateallUser = async(req, res) => {
       }
    try {
     const {name, email, password } = req.body;
-  
-    
+   console.log(req.body);
+   
      
     if (!email || !password ||!name) {
         return res.status(400).json({ msg: "Please provide name, email and password" });
     }
 
-    let sqlCheck = 'SELECT * FROM users WHERE email = ?';
-        db.query(sqlCheck, [email], async (err, result) => {
-            if (err) throw err;
+    // let sqlCheck = 'SELECT * FROM users WHERE email = ?';
+    //     db.query(sqlCheck, [email], async (err, result) => {
+    //         if (err) throw err;
 
-            if (result.length > 0) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Email already registered'
-                });
-            } else {
+    //         if (result.length > 0) {
+    //             return res.status(400).json({
+    //                 success: false,
+    //                 message: 'Email already registered'
+    //             });
+    //         } else {
 
-                const password=  await bcrypt.hash(req.body.password,10)
+               
+    //         }
+
+    const passwordhash=  await bcrypt.hash(req.body.password,10)
     
-                let updatedUser = { name: req.body.name, email: req.body.email,password:password,avatar:avatar };
-                let sql = 'UPDATE users SET ? WHERE id = ?';
-                 db.query(sql, [updatedUser, req.params.id],async (err, result) => {
-                    if (err) {
-                               return res.status(500).json({
-                                     success: false,
-                                     message: 'Database error: ' + err.message
-                                 });
-                             }
-                    return res.status(201).json({
-                        success:true,
-                       message:'User updated successfully.'})
+    let updatedUser = { name: req.body.name, email: req.body.email,password:passwordhash,avatar:avatar };
+    let sql = 'UPDATE users SET ? WHERE id = ?';
+     db.query(sql, [updatedUser, req.params.id],async (err, result) => {
+        if (err) {
+                   return res.status(500).json({
+                         success: false,
+                         message: 'Database error: ' + err.message
+                     });
+                 }
+        return res.status(201).json({
+            success:true,
+           message:'User updated successfully.'})
 
-            })
-
-            }
 
 
 
